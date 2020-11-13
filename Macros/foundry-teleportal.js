@@ -1,5 +1,13 @@
 /* Lavaeolous – Teleportal Macro
  * 
+ * Bugs / Stuff to do and fix:
+ * Teleports all owned tokens, not only the ones near the teleportal
+ * Animates the movement instead of "teleporting"
+ * Doesn't pan the camera to the target
+ * Has a hardcoded gridUnit instead of taking the one from the scene
+ * Uses the lazy way of separating rotations and directions into two variables instead of writing better code
+ * Has a hardcoded limit for offsetting teleported tokens at the target locations of 6
+ * Could use a better dialog interface
  */
 
  // Get the Teleportal Data
@@ -63,7 +71,7 @@
  
  var currentPosition = 0;
  
- if (!tokens) ui.notifications.warn("Bitte ein geeignetes Teleportal auswählen");
+ if (!tokens) ui.notifications.warn("Please select a valid teleportal!");
  else {
  
      var teleportalName= tokens.data.name;
@@ -225,7 +233,7 @@ function searchTeleportal(target) {
             token.update({
                 "x": correctedTargetX,
                 "y": correctedTargetY
-            });
+            }, {animate: false});
             tokenIndex++;
         })
 
