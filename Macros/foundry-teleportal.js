@@ -251,10 +251,11 @@ function searchTeleportal(target) {
         let targetX = targetTeleportal.data.x;
         let targetY = targetTeleportal.data.y;
 
-        let tokenIndex = 0;
 
         let validOwnedTokenKeys = Object.keys(validOwnedTokens);
-        validOwnedTokenKeys.forEach(async key => {
+        validOwnedTokenKeys.forEach(async function callback(key, tokenIndex) {
+
+            console.log("tokenIndex: "+ tokenIndex);
 
             let correctedTargetX = targetX + validTargetOffset[tokenIndex][0];
             let correctedTargetY = targetY + validTargetOffset[tokenIndex][1];
@@ -262,7 +263,7 @@ function searchTeleportal(target) {
                 "x": correctedTargetX,
                 "y": correctedTargetY
             }, {animate: false});
-            tokenIndex++;
+            await tokenIndex++;
         });
         canvas.animatePan({duration: 0, x: targetX, y: targetY});
 
