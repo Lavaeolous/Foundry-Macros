@@ -1,20 +1,24 @@
 /* Lavaeolous – Teleportal Macro
  * 
  * Change-Log:
- * - 13.11.2020: Now only teleports that are at most one space away
+ * - 14.11.2020: Now uses gridSize of the scene instead of a hardcoded value
+ *               Now pans the camera
+ *               Now teleports instead of moving the token
+ * - 13.11.2020: Now only teleports that are at most one space away can be activated
  * 
  * Bugs / Stuff to do and fix:
- * 
- * Animates the movement instead of "teleporting"
- * Doesn't pan the camera to the target
- * Has a hardcoded gridUnit instead of taking the one from the scene
  * Uses the lazy way of separating rotations and directions into two variables instead of writing better code
  * Has a hardcoded limit for offsetting teleported tokens at the target locations of 6
  * Could use a better dialog interface
  */
 
 // Variables
-var gridUnit = 128;
+var gridSize = canvas.grid.size;
+var validTargets = {};
+var teleportalCurrentAngle = 0;
+var teleportalToken;
+var teleportalName = "";
+var validOwnedTokens = {};
 
 var validRotations = {
     "0": "N",
@@ -44,32 +48,27 @@ var validTargetOffset = {
         0
     ],
     1: [
-        gridUnit,
+        gridSize,
         0
     ],
     2: [
         0,
-        gridUnit
+        gridSize
     ],
     3: [
-        gridUnit,
-        gridUnit
+        gridSize,
+        gridSize
     ],
     4: [
-        2 * gridUnit,
+        2 * gridSize,
         0
     ],
     5: [
-        gridUnit,
-        2 * gridUnit
+        gridSize,
+        2 * gridSize
     ]
 }
 
-var validTargets = {};
-var teleportalCurrentAngle = 0;
-var teleportalToken;
-var teleportalName = "";
-var validOwnedTokens = {};
 
 // Initialize the Macro
 main();
@@ -94,7 +93,7 @@ function initializeTeleportal() {
 
         /* Extract Teleportal Data
          * Source: The Teleportal that is being activated
-         * TargetPairs: The valid Targets in the format "<direction>_<targetTeleportal(s)>"
+         * TargetPairs: The valid Targets in the format "<direction>_<targetTeleportal>"
          */
          
         teleportalName = teleportal.data.name;
@@ -119,15 +118,15 @@ function getValidOwnedTokens() {
     let teleportalData = {
         "x": teleportalToken.data.x,
         "y": teleportalToken.data.y,
-        "width": teleportalToken.data.width * gridUnit,
-        "height": teleportalToken.data.height * gridUnit,
+        "width": teleportalToken.data.width * gridSize,
+        "height": teleportalToken.data.height * gridSize,
     };
 
     let validTeleportalZone = {
-        "x1": teleportalData.x - gridUnit,
-        "x2": teleportalData.x + teleportalData.width + gridUnit,
-        "y1": teleportalData.y - gridUnit,
-        "y2": teleportalData.y + teleportalData.height + gridUnit
+        "x1": teleportalData.x - gridSize,
+        "x2": teleportalData.x + teleportalData.width + gridSize,
+        "y1": teleportalData.y - gridSize,
+        "y2": teleportalData.y + teleportalData.height + gridSize
     };
 
     // Get the owned tokens of the activating player
@@ -227,12 +226,6 @@ function setTeleportal(angle) {
 
 // Use the teleportal
 function useTeleportal() {
-    /*
-    console.log("using the teleportal");
-    console.log("teleportalCurrentAngle: " + teleportalCurrentAngle);
-    console.log("correspondingDirection: " + validRotations[teleportalCurrentAngle]);
-    console.log("target: " + validTargets[validRotations[teleportalCurrentAngle]]);
-    */
 
     // Fix for ppl changing the angle per alt-mousewheel after picking a direction
     teleportalCurrentAngle = teleportalToken.data.rotation;
@@ -261,18 +254,17 @@ function searchTeleportal(target) {
         let tokenIndex = 0;
 
         let validOwnedTokenKeys = Object.keys(validOwnedTokens);
-        validOwnedTokenKeys.forEach(key => {
-
-            validOwnedTokens[key].setPosition(targetX, targetY, false);
+        validOwnedTokenKeys.forEach(async key => {
 
             let correctedTargetX = targetX + validTargetOffset[tokenIndex][0];
             let correctedTargetY = targetY + validTargetOffset[tokenIndex][1];
-            validOwnedTokens[key].update({
+            await validOwnedTokens[key].update({
                 "x": correctedTargetX,
                 "y": correctedTargetY
-            });
+            }, {animate: false});
             tokenIndex++;
-        })
+        });
+        canvas.animatePan({duration: 0, x: targetX, y: targetY});
 
     } catch (e) {
         ui.notifications.warn("You hear a low vibrating hum, but nothing happens");
