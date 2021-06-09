@@ -1,6 +1,7 @@
 /* Lavaeolous – Teleportal Macro
  * 
  * Change-Log:
+ * - 09.06.2021: Updated for FoundryVTT 0.8.6
  * - 14.11.2020: Now uses gridSize of the scene instead of a hardcoded value
  *               Now pans the camera
  *               Now teleports instead of moving the token
@@ -98,13 +99,19 @@ function initializeTeleportal() {
          
         teleportalName = teleportal.data.name;
         teleportalToken = canvas.tokens.placeables.find(t => t.name === teleportalName);
+        
+        console.log("teleportalName: " + teleportalName);
 
         var targetPairs = teleportalName.match(/Targets\[([^\]]*)/)[1].split(",");
 
         targetPairs.forEach(targetPair => {
             let direction = targetPair.split("_")[0];
             let target = targetPair.split("_")[1];
-            validTargets[direction] = target;
+            
+            if(direction !== "") {
+                validTargets[direction] = target;
+            }
+            
         });
 
         teleportalCurrentAngle = teleportalToken.data.rotation;
@@ -113,6 +120,9 @@ function initializeTeleportal() {
 }
 
 function getValidOwnedTokens() {
+    
+    console.log("teleportalToken")
+    console.log(teleportalToken)
     
     // Token Positions start at the top left corner of the token
     let teleportalData = {
@@ -133,6 +143,10 @@ function getValidOwnedTokens() {
     let ownedTokens = canvas.tokens.placeables.filter(t => t.owner && t.name.search(/Source/i) === -1 && t.name.search(/Teleportal/i) === -1)
 
     ownedTokens.forEach(token => {
+        
+        console.log("token")
+        
+        console.log(token)
 
         // Check if an owned token lies in the valid teleportal zone
         if(token.data.x >= validTeleportalZone.x1 && token.data.x < validTeleportalZone.x2 && token.data.y >= validTeleportalZone.y1 && token.data.y < validTeleportalZone.y2) {
@@ -219,13 +233,21 @@ function createDialog() {
 
 // Set the teleportal disk to a specified rotation
 function setTeleportal(angle) {
+
+    console.log("angle to set: " + angle)
+    console.log("teleportalToken")
+    console.log(teleportalToken)
+
     teleportalCurrentAngle = angle;
-    teleportalToken.data.rotation = angle;
-    teleportalToken.update({ "data.rotation": angle });
+    teleportalToken.document.data.rotation = angle;
+    teleportalToken.document.update({ "rotation": angle });
 }
 
 // Use the teleportal
 function useTeleportal() {
+    
+    console.log("teleportalToken use")
+    console.log(teleportalToken)
 
     // Fix for ppl changing the angle per alt-mousewheel after picking a direction
     teleportalCurrentAngle = teleportalToken.data.rotation;
@@ -247,6 +269,9 @@ function searchTeleportal(target) {
                 return token;
             }
         });
+        
+        console.log("targetTeleportal")
+        console.log(targetTeleportal)
 
         let targetX = targetTeleportal.data.x;
         let targetY = targetTeleportal.data.y;
@@ -263,7 +288,7 @@ function searchTeleportal(target) {
                 "x": correctedTargetX,
                 "y": correctedTargetY
             }, {animate: false});
-            await tokenIndex++;
+            tokenIndex++;
         });
         canvas.animatePan({duration: 0, x: targetX, y: targetY});
 
