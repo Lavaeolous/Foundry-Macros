@@ -2,11 +2,12 @@
 
 /// <summary>
 /// This macro can be called from a journal entry via the module Inline Macro Execution and
-/// [[/macroExec "01_Book-Event-Skill-Check" skill=perception dc=17]]{flavor}
+/// [[/macroExec "01_Book-Event-Skill-Check" journalID=<ID> skill=perception dc=17]]{flavor}
 /// </summary>
-/// <param name="scope.skill">The skill used for the skill check
-/// <param name="scope.dc">The difficulty class of the skill check
-/// <param name="scope.journalID">The id of the journal containing the results for crit-success, success, failure and crit-fail
+/// <param name="scope.skill">The skill used for the skill check</param>
+/// <param name="scope.dc">The difficulty class of the skill check</param>
+/// <param name="scope.journalID">The id of the journal containing the results for crit-success, success, failure and crit-fail.
+/// I simply use the same journal the start page is in.</param>
 /// 
 /// Depending on the degree of success of the skill check, one page of 2-6 is opened and shared with the players:
 /// Page 2: Critical Failure
